@@ -35,7 +35,7 @@
             <td>${userMeal.calories}</td>
             <td><a href="meals?action=update&id=${userMeal.id}">Update</a></td>
             <td><a href="meals?action=delete&id=${userMeal.id}">Delete</a></td>
-            <td>${userMeal.id}</td>
+            <%--<td>${userMeal.id}</td>--%>
         </tr>
         <%--    <c:out value="Excess = ${userMeal.isExcess()}"/>--%>
     </c:forEach>

@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -24,9 +25,21 @@ public class MealServlet extends HttpServlet {
     UserMealRepository repository = new InMemoryUserMealRepository();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        LOG.info(req.getRequestURI());
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        String id = req.getParameter("id");
+        UserMeal um = new UserMeal(id.isEmpty() ? null :
+                Integer.parseInt(id),
+                LocalDateTime.parse(req.getParameter("dateTime")),
+                req.getParameter("description"),
+                Integer.valueOf(req.getParameter("calories")));
+        LOG.info(um.isNew() ? "Create {}" : "Update {}", um);
+        repository.save(um);
+        resp.sendRedirect("meals");
+    }
 
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
 
         if (action == null){
@@ -40,8 +53,14 @@ public class MealServlet extends HttpServlet {
                 LOG.info("Meal {} was not deleted", id);
             }
             resp.sendRedirect("meals");
+        }else {
+            final UserMeal userMeal = action.equals("create") ?
+                    new UserMeal(LocalDateTime.now(), "Добавленный", 9999) :
+                    repository.get(getId(req));
+            LOG.info("Meal {}",userMeal.getCalories());
+            req.setAttribute("meal", userMeal);
+            req.getRequestDispatcher("mealEdit.jsp").forward(req, resp);
         }
-
     }
 
     private int getId(HttpServletRequest request){
