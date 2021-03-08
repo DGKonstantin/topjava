@@ -18,7 +18,7 @@
 > - В новой версии Spring классы `spring-mvc` требуют `WebApplicationContext`, поэтому поправил `inmemory.xml`
 
 #### Apply 7_02_HW6_meals.patch
-При переходе на AJAX `JspMealController` удалим за ненадобностью, возвращение всей еды `meals()` останется в `RootController`.
+При переходе на AJAX `JspMealController` удалим за ненадобностью, возвращение всей еды `userMeals()` останется в `RootController`.
 
 #### Apply 7_03_HW6_fix_relative_url_utf8.patch
 -  <a href="http://stackoverflow.com/questions/4764405/how-to-use-relative-paths-without-including-the-context-root-name">Relative paths in JSP</a>
@@ -34,7 +34,7 @@
    - Бага [HINT_PASS_DISTINCT_THROUGH does not work if 'hibernate.use_sql_comments=true'](https://hibernate.atlassian.net/browse/HHH-13280). При `hibernate.use_sql_comments=false` все работает- в SELECT нет DISTINCT.
 
 - Тест `DataJpaUserServiceTest.testGetWithMeals()` не работает для admin (у админа 2 роли, и еда при JOIN дублируется). `DISTINCT` при нескольких JOIN не помогает.
-Оставил в графе только `meals`. Корректно поставить тип `LOAD`, чтобы остальные ассоциации доставались по стратегии модели. Однако [с типом по умолчанию `FETCH` роли также достаются](https://stackoverflow.com/a/46013654/548473)  (похоже, что бага).
+Оставил в графе только `userMeals`. Корректно поставить тип `LOAD`, чтобы остальные ассоциации доставались по стратегии модели. Однако [с типом по умолчанию `FETCH` роли также достаются](https://stackoverflow.com/a/46013654/548473)  (похоже, что бага).
 
 #### Apply 7_06_HW6_optional_jdbc.patch
 > - реализовал в `JdbcUserRepositoryImpl.getAll()` доставание ролей через лямбду
@@ -151,9 +151,9 @@ hamcrest-all используется в проверках `RootControllerTest`
 
 Да, Spring смотрит в classpath и если видит там Jackson, то подключает интеграцию с ним.
 
->  Где-то слышал, что любой ресурс по REST должен однозначно идентифицироваться через url без параметров. Правильно ли задавать URL для фильтрации в виде `http://localhost/topjava/rest/meals/filter/{startDate}/{startTime}/{endDate}/{endTime}` ?
+>  Где-то слышал, что любой ресурс по REST должен однозначно идентифицироваться через url без параметров. Правильно ли задавать URL для фильтрации в виде `http://localhost/topjava/rest/userMeals/filter/{startDate}/{startTime}/{endDate}/{endTime}` ?
 
-Так делают, только при отношении <a href="https://ru.wikipedia.org/wiki/Диаграмма_классов#.D0.90.D0.B3.D1.80.D0.B5.D0.B3.D0.B0.D1.86.D0.B8.D1.8F">агрегация</a>, например, если давать админу право смотреть еду любого юзера, URL мог бы быть похож на `http://localhost/topjava/rest/users/{userId}/meals/{mealId}`. В случае критериев поиска или страничных данных они передаются как параметр. Смотри также:
+Так делают, только при отношении <a href="https://ru.wikipedia.org/wiki/Диаграмма_классов#.D0.90.D0.B3.D1.80.D0.B5.D0.B3.D0.B0.D1.86.D0.B8.D1.8F">агрегация</a>, например, если давать админу право смотреть еду любого юзера, URL мог бы быть похож на `http://localhost/topjava/rest/users/{userId}/userMeals/{mealId}`. В случае критериев поиска или страничных данных они передаются как параметр. Смотри также:
 - [15 тривиальных фактов о правильной работе с протоколом HTTP](https://habrahabr.ru/company/yandex/blog/265569/)
 - <a href="http://blog.mwaysolutions.com/2014/06/05/10-best-practices-for-better-restful-api/">10 Best Practices for Better RESTful
 - [REST resource hierarchy (если кратко: не рекомендуется)](https://stackoverflow.com/questions/15259843/how-to-structure-rest-resource-hierarchy)
@@ -165,7 +165,7 @@ hamcrest-all используется в проверках `RootControllerTest`
 ## ![hw](https://cloud.githubusercontent.com/assets/13649199/13672719/09593080-e6e7-11e5-81d1-5cb629c438ca.png) Домашнее задание HW07
 
 - 1: Добавить тесты контроллеров:
-  - 1.1 `RootControllerTest.testMeals` для `meals.jsp`
+  - 1.1 `RootControllerTest.testMeals` для `userMeals.jsp`
   - 1.2 `ResourceControllerTest` для `style.css` (проверить `status` и `ContentType`)
 - 2: Реализовать `MealRestController` и протестировать его через `MealRestControllerTest`
   - 2.1 следите, чтобы url в тестах совпадал с параметрами в методе контроллера. Можно добавить логирование `<logger name="org.springframework.web" level="debug"/>` для проверки маршрутизации.
@@ -185,8 +185,8 @@ hamcrest-all используется в проверках `RootControllerTest`
 - 1: Ошибка в тесте _Invalid read array from JSON_ обычно расшифровывается немного ниже: читайте внимательно.
 - 2: <a href="https://urvanov.ru/2016/12/03/jackson-и-неизменяемые-объекты/">Jackson и неизменяемые объекты</a>
 - 3: <a href="http://www.baeldung.com/jackson">Jackson JSON Tutorial</a>
-- 4: Если у meal, приходящий в контроллер, поля `null`, проверьте `@RequestBody` перед параметром (данные приходят в формате JSON)
+- 4: Если у userMeal, приходящий в контроллер, поля `null`, проверьте `@RequestBody` перед параметром (данные приходят в формате JSON)
 - 5: При проблемах с собственным форматтером убедитесь, что в конфигурации `<mvc:annotation-driven...` не дублируется
 - 6: **Проверьте выполение ВСЕХ тестов через maven**. В случае проблем проверьте, что не портите константу из `MealTestData`
 - 7: `@Autowired` в тестах нужно делать в том месте, где класс будет использоваться. Общий принцип: не размазывать код по классам, объявление переменных держать как можно ближе к ее использованию, группировать (не смешивать) код с разной функциональностью.
-- 8: Попробуйте в `RootControllerTest.testMeals` сделать сравнение через `model().attribute("meals", expectedValue)`. Учтите, что вывод результатов через `toString` к сравнению отношения не имеет
+- 8: Попробуйте в `RootControllerTest.testMeals` сделать сравнение через `model().attribute("userMeals", expectedValue)`. Учтите, что вывод результатов через `toString` к сравнению отношения не имеет
